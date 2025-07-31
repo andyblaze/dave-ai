@@ -12,14 +12,15 @@
     const net = create(3, 10); // 3 inputs, 10 hidden neurons
 
     // Example input and target
-    const input = [0.1, 0.5, 0.3];
+    const n = Math.floor(Math.random() * 100);
+    const input = encodeNumber(n);
     const target = 1;
 
     // Train once
     train(net, input, target);
 
     // Predict
-    console.log('Prediction:', predict(net, input));
+    console.log('Prediction:', predict(net, 5));
   </script>
 </body>
 </html>

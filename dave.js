@@ -6,6 +6,14 @@ function sigmoidDerivative(x) {
   return x * (1 - x); // x assumed to be sigmoid(x)
 }
 
+function encodeNumber(n) {
+  return [
+    n / 100,
+    n % 10 === 0 ? 1 : 0,
+    n % 10 === 5 ? 1 : 0
+  ];
+}
+
 function create(inputSize, hiddenSize, learningRate = 0.1) {
   return {
     inputSize,
@@ -67,6 +75,7 @@ function train(net, input, target) {
   return error;
 }
 
-function predict(net, input) {
+function predict(net, number) {
+    const input = encodeNumber(number)
   return feedForward(net, input);
 }
