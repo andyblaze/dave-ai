@@ -2,12 +2,19 @@ function sigmoid(x) {
   return 1 / (1 + Math.exp(-x));
 }
 
-
 function sigmoidDerivative(x) {
   return x * (1 - x); // x assumed to be sigmoid(x)
 }
 
+function mt_rand(min = 0, max = 2147483647) {
+    if (min > max) [min, max] = [max, min]; // swap if min > max
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function encodeNumber(n) {
+  if (typeof n !== 'number' || isNaN(n)) {
+    throw new Error("encodeNumber received bad input: " + n);
+  }
   return [
     n / 100,
     n % 10 === 0 ? 1 : 0,
@@ -77,6 +84,6 @@ function train(net, input, target) {
 }
 
 function predict(net, number) {
-    const input = encodeNumber(number)
+    const input = encodeNumber(number);
   return feedForward(net, input);
 }

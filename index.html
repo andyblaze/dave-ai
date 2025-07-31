@@ -12,16 +12,36 @@
     const net = create(3, 10); // 3 inputs, 10 hidden neurons
 
     // Example input and target
-    const n = Math.floor(Math.random() * 100);
-    const input = encodeNumber(n);
-    const target = 1;
-
-    // Train once
-    train(net, input, target);
+    //const n = Math.floor(Math.random() * 100);
+    //const input = encodeNumber(n);
+    //const target = 1;
+    
+    function trainYes(net, yes) {
+        const input = encodeNumber(yes);
+        //console.log(input);
+        train(net, input, 1);
+    }
+    function trainNo(net, no) {
+        const input = encodeNumber(no);
+        //console.log(no, input);
+        train(net, input, 0);
+    }
+    function loop(net, count=60000) {
+        const noValues = Array.from({ length: 10000 }, (_, i) => i).filter(n => n % 5 !== 0);
+        for (let i = 0; i < count; i++) {
+            const yes = mt_rand(0, 2000) * 5;
+            trainYes(net, yes);
+            const no = noValues[mt_rand(0, noValues.length -1)];
+            trainNo(net, no);
+        }
+    }
+    // Train many times
+    loop(net);
     
 
     // Predict
     console.log('Prediction:', predict(net, 5));
+    console.log('Prediction:', predict(net, 6));
   </script>
 </body>
 </html>
