@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dave AI Example</title>
+</head>
+<body>
+  <h1>Dave AI Test</h1>
+  <script src="dave.js"></script>
+  <script>
+    const net = create(3, 10); // 3 inputs, 10 hidden neurons
+
+    // Example input and target
+    const input = [0.1, 0.5, 0.3];
+    const target = 1;
+
+    // Train once
+    train(net, input, target);
+
+    // Predict
+    console.log('Prediction:', predict(net, input));
+  </script>
+</body>
+</html>
