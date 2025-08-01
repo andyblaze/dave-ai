@@ -65,8 +65,10 @@ class TestHarness {
 }
 
 class Canvas {
-    constructor(canvasID) {
+    constructor(canvasID, w, h) {
         this.ctx = document.getElementById(canvasID).getContext('2d');
+        this.width = w;
+        this.height = h;
     }
     circle(x, y, r, fill) {
         this.ctx.beginPath();
@@ -80,30 +82,29 @@ class Canvas {
         this.ctx.font = "20px sans-serif";
         this.ctx.fillText(txt, x, y);
     }
-    grid() {
+    grid() { // presuming width & height are equal
         this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
-        for ( let i = 80; i < 800; i+=80 ) {
+        for ( let i = 80; i < this.width; i+=80 ) {
             // vertical lines
             this.ctx.beginPath();
             this.ctx.moveTo(i, 0);
-            this.ctx.lineTo(i, 800);
+            this.ctx.lineTo(i, this.width);
             this.ctx.stroke();   
             // horizontal lines            
             this.ctx.beginPath();
             this.ctx.moveTo(0, i);
-            this.ctx.lineTo(800, i);
+            this.ctx.lineTo(this.width, i);
             this.ctx.stroke();            
         }
     }
     clear() {
-        this.ctx.clearRect(0, 0, 800, 800);
+        this.ctx.clearRect(0, 0, this.width, this.height);
     }
 }
 class Visualiser {
     constructor(canvasID, w, h) {
-        //this.ctx = document.getElementById(canvasID).getContext('2d');
-        this.canvas = new Canvas(canvasID);
+        this.canvas = new Canvas(canvasID, w, h);
         this.width = w;
         this.height = h;
         this.circleRadius = 20;
@@ -111,8 +112,8 @@ class Visualiser {
     setNetwork(n) {
         this.net = n;
     }
-    setActivations(a) {
-        this.acts = a;
+    setLayers(l) {
+        this.layers = l;
     }
     valueToColor(v) {
         const red = Math.floor(v * 255);
@@ -121,13 +122,13 @@ class Visualiser {
     }
     drawNeuron(x, y, value, label) {
         this.canvas.circle(x + this.circleRadius, y + this.circleRadius, this.circleRadius, this.valueToColor(value));
-        this.canvas.text(label, x - this.circleRadius, y + 20);
-        this.canvas.text(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 40);
+        //this.canvas.text(label, x - this.circleRadius, y + 20);
+        this.canvas.text(value.toFixed(2), x, y + this.circleRadius + 40);
     }
     grid() {
         const Xs = [20, 140, 180];
         const spacing = 0;
-        const count = this.acts[2].values.length;
+        const count = this.layers[2].values.length;
         const totalSpacing = spacing * (count - 1);
         const availableHeight = this.height - totalSpacing;
         const boxH = Math.floor(availableHeight / count);
@@ -135,25 +136,30 @@ class Visualiser {
         let boxes = [];
         for ( let i = 0; i < count; i++ )
             boxes.push({"x":140, "y":(i * boxH), "w":80, "h":80});
-        console.log(boxes);
+        //console.log(boxes);
         return boxes;
+    }
+    drawLayer(x, layer) {
+        const headingHeight = 25;
+        const boxSize = 70;
+        const layerHeight = layer.values.length * boxSize + headingHeight;
+        const layerTop = Math.floor((this.height - layerHeight) / 2);
+        this.canvas.text(layer.title, x, layerTop);
+        layer.values.forEach((val, i) => {
+            this.drawNeuron(x, layerTop + headingHeight + (i * boxSize), val, `I${i + 1}`);
+        });
     }
     run() {
         const number = parseInt(document.getElementById("testInput").value);
-        this.setActivations(this.net.getActivations(number));
+        this.setLayers(this.net.getActivations(number));
         this.canvas.clear();
         this.canvas.grid();
         // Draw input neurons
-        this.acts[0].values.forEach((val, i) => {
-            this.drawNeuron(50, 120 + i * 70, val, `I${i + 1}`);
-        });
+        this.drawLayer(20, this.layers[0]);
         // Draw hidden neurons
-        const boxes = this.grid();
-        this.acts[2].values.forEach((val, i) => {
-            this.drawNeuron(boxes[i].x, boxes[i].y, val, `H${i + 1}`);
-        });
+        this.drawLayer(110, this.layers[2]);
         // Draw output neuron
-        this.drawNeuron(330, 120, this.acts[1].values[0], 'Output');
+        this.drawLayer(200, this.layers[1]);
     }
 }
 const net = new Dave(3, 10);
