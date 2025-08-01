@@ -64,9 +64,46 @@ class TestHarness {
     }
 }
 
+class Canvas {
+    constructor(canvasID) {
+        this.ctx = document.getElementById(canvasID).getContext('2d');
+    }
+    circle(x, y, r, fill) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, r, 0, Math.PI * 2);
+        this.ctx.fillStyle = fill;
+        this.ctx.fill();
+        this.ctx.stroke();
+    }
+    text(txt, x, y) {
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = "20px sans-serif";
+        this.ctx.fillText(txt, x, y);
+    }
+    grid() {
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        for ( let i = 80; i < 800; i+=80 ) {
+            // vertical lines
+            this.ctx.beginPath();
+            this.ctx.moveTo(i, 0);
+            this.ctx.lineTo(i, 800);
+            this.ctx.stroke();   
+            // horizontal lines            
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, i);
+            this.ctx.lineTo(800, i);
+            this.ctx.stroke();            
+        }
+    }
+    clear() {
+        this.ctx.clearRect(0, 0, 800, 800);
+    }
+}
 class Visualiser {
     constructor(canvasID, w, h) {
-        this.ctx = document.getElementById(canvasID).getContext('2d');
+        //this.ctx = document.getElementById(canvasID).getContext('2d');
+        this.canvas = new Canvas(canvasID);
         this.width = w;
         this.height = h;
         this.circleRadius = 20;
@@ -82,34 +119,15 @@ class Visualiser {
         const blue = 255 - red;
         return `rgba(${red},0,${blue},0.5)`;
     }
-    drawCircle(x, y, value) {
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, this.circleRadius, 0, Math.PI * 2);
-        this.ctx.fillStyle = this.valueToColor(value);
-        this.ctx.fill();
-        this.ctx.stroke();
-    }
-    drawLabel(x, y, label) {
-        //this.ctx.textAlign = "center";
-        this.ctx.fillStyle = 'black';
-        this.ctx.font = "20px sans-serif";
-        this.ctx.fillText(label, x - this.circleRadius, y + 20); // - this.circleRadius + 20);
-    }
-    drawValue(x, y, value) {
-        //this.ctx.textAlign = "center";
-        this.ctx.fillStyle = 'black';
-        this.ctx.font = "20px sans-serif";
-        this.ctx.fillText(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 40);
-    }
     drawNeuron(x, y, value, label) {
-        this.drawCircle(x + this.circleRadius, y + this.circleRadius, value);
-        this.drawLabel(x, y, label);
-        this.drawValue(x, y, value);
+        this.canvas.circle(x + this.circleRadius, y + this.circleRadius, this.circleRadius, this.valueToColor(value));
+        this.canvas.text(label, x - this.circleRadius, y + 20);
+        this.canvas.text(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 40);
     }
     grid() {
         const Xs = [20, 140, 180];
         const spacing = 0;
-        const count = this.acts.hidden.length;
+        const count = this.acts[2].values.length;
         const totalSpacing = spacing * (count - 1);
         const availableHeight = this.height - totalSpacing;
         const boxH = Math.floor(availableHeight / count);
@@ -120,38 +138,22 @@ class Visualiser {
         console.log(boxes);
         return boxes;
     }
-    drawGrid() {
-        this.ctx.strokeStyle = "black";
-        this.ctx.lineWidth = 1;
-        for ( let i = 80; i < this.height; i+=80 ) {
-            // vertical lines
-            this.ctx.beginPath();
-            this.ctx.moveTo(i, 0);
-            this.ctx.lineTo(i, this.height);
-            this.ctx.stroke();   
-            // horizontal lines            
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, i);
-            this.ctx.lineTo(this.width, i);
-            this.ctx.stroke();            
-        }
-    }
     run() {
         const number = parseInt(document.getElementById("testInput").value);
         this.setActivations(this.net.getActivations(number));
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.drawGrid();
+        this.canvas.clear();
+        this.canvas.grid();
         // Draw input neurons
-        this.acts.inputs.forEach((val, i) => {
+        this.acts[0].values.forEach((val, i) => {
             this.drawNeuron(50, 120 + i * 70, val, `I${i + 1}`);
         });
         // Draw hidden neurons
         const boxes = this.grid();
-        this.acts.hidden.forEach((val, i) => {
+        this.acts[2].values.forEach((val, i) => {
             this.drawNeuron(boxes[i].x, boxes[i].y, val, `H${i + 1}`);
         });
         // Draw output neuron
-        this.drawNeuron(330, 120, this.acts.output, 'Output');
+        this.drawNeuron(330, 120, this.acts[1].values[0], 'Output');
     }
 }
 const net = new Dave(3, 10);
