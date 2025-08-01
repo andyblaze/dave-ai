@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dave AI Example</title>
+<style = "text/css">
+    #nnCanvas {
+        border:1px #000000 solid;
+    }
+</style>
 </head>
 <body>
 <div>
@@ -64,7 +69,7 @@ class Visualiser {
         this.ctx = document.getElementById(canvasID).getContext('2d');
         this.width = w;
         this.height = h;
-        this.circleRadius = 40;
+        this.circleRadius = 20;
     }
     setNetwork(n) {
         this.net = n;
@@ -85,14 +90,16 @@ class Visualiser {
         this.ctx.stroke();
     }
     drawLabel(x, y, label) {
+        //this.ctx.textAlign = "center";
         this.ctx.fillStyle = 'black';
         this.ctx.font = "20px sans-serif";
-        this.ctx.fillText(label, x - this.circleRadius, y - this.circleRadius + 20);
+        this.ctx.fillText(label, x - this.circleRadius, y + 20); // - this.circleRadius + 20);
     }
     drawValue(x, y, value) {
+        //this.ctx.textAlign = "center";
         this.ctx.fillStyle = 'black';
         this.ctx.font = "20px sans-serif";
-        this.ctx.fillText(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 60);
+        this.ctx.fillText(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 40);
     }
     drawNeuron(x, y, value, label) {
         this.drawCircle(x + this.circleRadius, y + this.circleRadius, value);
@@ -113,10 +120,27 @@ class Visualiser {
         console.log(boxes);
         return boxes;
     }
+    drawGrid() {
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        for ( let i = 80; i < this.height; i+=80 ) {
+            // vertical lines
+            this.ctx.beginPath();
+            this.ctx.moveTo(i, 0);
+            this.ctx.lineTo(i, this.height);
+            this.ctx.stroke();   
+            // horizontal lines            
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, i);
+            this.ctx.lineTo(this.width, i);
+            this.ctx.stroke();            
+        }
+    }
     run() {
         const number = parseInt(document.getElementById("testInput").value);
         this.setActivations(this.net.getActivations(number));
         this.ctx.clearRect(0, 0, this.width, this.height);
+        this.drawGrid();
         // Draw input neurons
         this.acts.inputs.forEach((val, i) => {
             this.drawNeuron(50, 120 + i * 70, val, `I${i + 1}`);
