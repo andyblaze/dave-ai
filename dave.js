@@ -82,6 +82,15 @@ class Dave {
         const input = encodeNumber(number);
         return this.feedForward(input);
     }
+    getActivations(number) {
+        const inputs = encodeNumber(number);
+        const output = this.predict(number); // this sets dave.hiddenActivations
+        return {
+            inputs,
+            hidden: this.hiddenActivations,
+            output
+        };
+    }
 }
 
 function create(inputSize, hiddenSize, learningRate = 0.1) {

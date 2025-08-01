@@ -6,9 +6,14 @@
   <title>Dave AI Example</title>
 </head>
 <body>
-  <h1>Dave AI Test</h1>
-  <script type="text/javascript" src="dave.js"></script>
-  <script type="text/javascript">
+<div>
+  <label>Input Number: <input type="number" id="testInput" value="105" min="0" max="160" /></label>
+  <button onclick="visualiser.run()">Visualize</button>
+</div>
+
+<canvas id="nnCanvas" width="800" height="800"></canvas>
+<script type="text/javascript" src="dave.js"></script>
+<script type="text/javascript">
      //create(3, 10); // x inputs, y hidden neurons
     
 class Trainer { 
@@ -53,16 +58,70 @@ class TestHarness {
         console.log("Accuracy: " + (correct / 100) + "%");    
     }
 }
+
+class Visualiser {
+    constructor(canvasID, w, h) {
+        this.ctx = document.getElementById(canvasID).getContext('2d');
+        this.width = w;
+        this.height = h;
+        this.circleRadius = 20;
+    }
+    setNetwork(n) {
+        this.net = n;
+    }
+    setActivations(a) {
+        this.acts = a;
+    }
+    valueToColor(v) {
+        const red = Math.floor(v * 255);
+        const blue = 255 - red;
+        return `rgba(${red},0,${blue},0.5)`;
+    }
+    drawCircle(x, y, value) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.circleRadius, 0, Math.PI * 2);
+        this.ctx.fillStyle = this.valueToColor(value);
+        this.ctx.fill();
+        this.ctx.stroke();
+    }
+    drawText(x, y, value, label) {
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = "20px sans-serif";
+        this.ctx.fillText(label, x - this.circleRadius, y - this.circleRadius - 20);
+        this.ctx.fillText(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 40);
+    }
+    drawNeuron(x, y, value, label) {
+        this.drawCircle(x, y + 6, value);
+        this.drawText(x, y + 6, value, label);
+    }
+    run() {
+        const number = parseInt(document.getElementById("testInput").value);
+        this.setActivations(this.net.getActivations(number));
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        // Draw input neurons
+        this.acts.inputs.forEach((val, i) => {
+            this.drawNeuron(50, 120 + i * 70, val, `I${i + 1}`);
+        });
+        // Draw hidden neurons
+        this.acts.hidden.forEach((val, i) => {
+            this.drawNeuron(170, 70 + i * 70, val, `H${i + 1}`);
+        });
+        // Draw output neuron
+        this.drawNeuron(330, 120, this.acts.output, 'Output');
+    }
+}
 const net = new Dave(3, 10);
-trainer = new Trainer(net);
-test = new TestHarness();
+const trainer = new Trainer(net);
+const test = new TestHarness();
 trainer.loop(net);
 test.prediction(net);
+const visualiser = new Visualiser("nnCanvas", 800, 800);
+visualiser.setNetwork(net);
     
 
 
     
 
-  </script>
+</script>
 </body>
 </html>
