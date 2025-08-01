@@ -64,7 +64,7 @@ class Visualiser {
         this.ctx = document.getElementById(canvasID).getContext('2d');
         this.width = w;
         this.height = h;
-        this.circleRadius = 20;
+        this.circleRadius = 40;
     }
     setNetwork(n) {
         this.net = n;
@@ -84,15 +84,34 @@ class Visualiser {
         this.ctx.fill();
         this.ctx.stroke();
     }
-    drawText(x, y, value, label) {
+    drawLabel(x, y, label) {
         this.ctx.fillStyle = 'black';
         this.ctx.font = "20px sans-serif";
-        this.ctx.fillText(label, x - this.circleRadius, y - this.circleRadius - 20);
-        this.ctx.fillText(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 40);
+        this.ctx.fillText(label, x - this.circleRadius, y - this.circleRadius + 20);
+    }
+    drawValue(x, y, value) {
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = "20px sans-serif";
+        this.ctx.fillText(value.toFixed(2), x - this.circleRadius, y + this.circleRadius + 60);
     }
     drawNeuron(x, y, value, label) {
-        this.drawCircle(x, y + 6, value);
-        this.drawText(x, y + 6, value, label);
+        this.drawCircle(x + this.circleRadius, y + this.circleRadius, value);
+        this.drawLabel(x, y, label);
+        this.drawValue(x, y, value);
+    }
+    grid() {
+        const Xs = [20, 140, 180];
+        const spacing = 0;
+        const count = this.acts.hidden.length;
+        const totalSpacing = spacing * (count - 1);
+        const availableHeight = this.height - totalSpacing;
+        const boxH = Math.floor(availableHeight / count);
+        const boxW = 80;
+        let boxes = [];
+        for ( let i = 0; i < count; i++ )
+            boxes.push({"x":140, "y":(i * boxH), "w":80, "h":80});
+        console.log(boxes);
+        return boxes;
     }
     run() {
         const number = parseInt(document.getElementById("testInput").value);
@@ -103,8 +122,9 @@ class Visualiser {
             this.drawNeuron(50, 120 + i * 70, val, `I${i + 1}`);
         });
         // Draw hidden neurons
+        const boxes = this.grid();
         this.acts.hidden.forEach((val, i) => {
-            this.drawNeuron(170, 70 + i * 70, val, `H${i + 1}`);
+            this.drawNeuron(boxes[i].x, boxes[i].y, val, `H${i + 1}`);
         });
         // Draw output neuron
         this.drawNeuron(330, 120, this.acts.output, 'Output');
@@ -113,14 +133,11 @@ class Visualiser {
 const net = new Dave(3, 10);
 const trainer = new Trainer(net);
 const test = new TestHarness();
+const visualiser = new Visualiser("nnCanvas", 800, 800);
 trainer.loop(net);
 test.prediction(net);
-const visualiser = new Visualiser("nnCanvas", 800, 800);
 visualiser.setNetwork(net);
-    
-
-
-    
+  
 
 </script>
 </body>
