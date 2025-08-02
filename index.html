@@ -111,9 +111,6 @@ class Visualiser {
     setNetwork(n) {
         this.net = n;
     }
-    setLayers(l) {
-        this.layers = l;
-    }
     valueToColor(v) {
         const red = Math.floor(v * 255);
         const blue = 255 - red;
@@ -138,31 +135,31 @@ class Visualiser {
         //console.log(boxes);
         return boxes;
     }
-    drawLayer(x, layer) {
-        const headingHeight = 25;
-        const boxSize = 70;
-        const layerHeight = layer.values.length * boxSize + headingHeight;
-        const layerTop = Math.floor((this.height - layerHeight) / 2);
-        this.canvas.text(layer.title, x, layerTop);
+    drawLayer(layer) {
+        this.canvas.text(layer.title, layer.x, layer.top);
         layer.values.forEach((val, i) => {
-            this.drawNeuron(x, layerTop + headingHeight + (i * boxSize), val, `I${i + 1}`);
+            this.drawNeuron(layer.x, (i * layer.boxSize) + layer.top + layer.headingHeight, val, `I${i + 1}`);
         });
     }
     run() {
         const number = parseInt(document.getElementById("testInput").value);
-        this.setLayers(this.net.getActivations(number));
+        let layers = this.net.getActivations(number);
         this.canvas.clear();
-        this.canvas.grid();
-        const Xs = [20, 120, 220, 320, 420, 520, 620];
-        for ( let i = 0; i < this.layers.length; i++ ) {
-            this.drawLayer(Xs[i], this.layers[i]);
+        //this.canvas.grid();
+        const baseX = 20;
+        const xShift = 110;
+        const headingHeight = 25;
+        const boxSize = 70;
+        for ( let i = 0; i < layers.length; i++ ) {
+            layers[i].count = layers[i].values.length;
+            const layerHeight = layers[i].count * boxSize + headingHeight;
+            const layerTop = Math.floor((this.height - layerHeight) / 2);
+            let newData = {
+                "x": i * xShift + baseX, "top": layerTop, "boxSize": boxSize, "headingHeight": headingHeight
+            };
+            Object.assign(layers[i], newData);
+            this.drawLayer(layers[i]);
         }
-        // Draw input neurons
-        //this.drawLayer(20, this.layers[0]);
-        // Draw hidden neurons
-        //this.drawLayer(110, this.layers[1]);
-        // Draw output neuron
-        //this.drawLayer(200, this.layers[2]);
     }
 }
 const net = new Dave(3, 10);
