@@ -19,7 +19,6 @@
 <canvas id="nnCanvas" width="800" height="800"></canvas>
 <script type="text/javascript" src="dave.js"></script>
 <script type="text/javascript">
-     //create(3, 10); // x inputs, y hidden neurons
     
 class Trainer { 
     constructor(net) {
@@ -154,12 +153,16 @@ class Visualiser {
         this.setLayers(this.net.getActivations(number));
         this.canvas.clear();
         this.canvas.grid();
+        const Xs = [20, 120, 220, 320, 420, 520, 620];
+        for ( let i = 0; i < this.layers.length; i++ ) {
+            this.drawLayer(Xs[i], this.layers[i]);
+        }
         // Draw input neurons
-        this.drawLayer(20, this.layers[0]);
+        //this.drawLayer(20, this.layers[0]);
         // Draw hidden neurons
-        this.drawLayer(110, this.layers[2]);
+        //this.drawLayer(110, this.layers[1]);
         // Draw output neuron
-        this.drawLayer(200, this.layers[1]);
+        //this.drawLayer(200, this.layers[2]);
     }
 }
 const net = new Dave(3, 10);

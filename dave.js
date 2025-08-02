@@ -22,6 +22,11 @@ function encodeNumber(n) {
   ];
 }
 
+function average(arr) {
+    if (!arr.length) return 0;
+    return arr.reduce((sum, val) => sum + val, 0) / arr.length;
+}
+
 class Dave {
     constructor(inputSize, hiddenSize, learningRate = 0.1) {
         this.inputSize = inputSize;
@@ -83,10 +88,15 @@ class Dave {
         return this.feedForward(input);
     }
     getActivations(number) {
+        const output = this.predict(number);
         return [
             {"title": "Input", "values": encodeNumber(number)},
-            {"title": "Output", "values": [this.predict(number)]}, // this sets dave.hiddenActivations
-            {"title": "Hidden", "values": this.hiddenActivations}
+            { title: "IH Weights", values: this.inputToHiddenWeights.map(wArr => average(wArr)) },
+            { title: "H Biases", values: this.hiddenBiases },
+            {"title": "Hidden", "values": this.hiddenActivations},
+            { title: "HO Weights", values: this.hiddenToOutputWeights },
+            { title: "O Bias", values: [this.outputBias] },
+            {"title": "Output", "values": [output]}
         ];
     }
 }
