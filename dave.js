@@ -90,13 +90,13 @@ class Dave {
     getActivations(number) {
         const output = this.predict(number);
         return [
-            {"title": "Input", "values": encodeNumber(number)},
-            { title: "IH Weights", values: this.inputToHiddenWeights.map(wArr => average(wArr)) },
-            { title: "H Biases", values: this.hiddenBiases },
+            { "title": "Input", "values": encodeNumber(number)},
+            { "title": "IH Weights", "values": this.inputToHiddenWeights.map(wArr => average(wArr)) },
+            { "title": "H Biases", "values": this.hiddenBiases },
             {"title": "Hidden", "values": this.hiddenActivations},
-            { title: "HO Weights", values: this.hiddenToOutputWeights },
-            { title: "O Bias", values: [this.outputBias] },
-            {"title": "Output", "values": [output]}
+            { "title": "HO Weights", "values": this.hiddenToOutputWeights },
+            { "title": "O Bias", "values": [this.outputBias] },
+            { "title": "Output", "values": [output]}
         ];
     }
 }

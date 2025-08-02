@@ -118,21 +118,21 @@ class Visualiser {
         const blue = 255 - red;
         return `rgba(${red},0,${blue},0.5)`;
     }
-    drawNeuron(x, y, value) {
-        this.canvas.circle(x + this.circleRadius, y + this.circleRadius, this.circleRadius, this.valueToColor(value));
-        this.canvas.text(value.toFixed(2), x, y + this.circleRadius + 40);
+    drawNeuron(x, y, radius, gap, value) {
+        this.canvas.circle(x + radius, y + radius, radius, this.valueToColor(value));
+        this.canvas.text(value.toFixed(2), x, y + radius + gap);
     }
     drawLayer(layer) {
         this.canvas.text(layer.title, layer.x, layer.top);
         layer.values.forEach((val, i) => {
-            this.drawNeuron(layer.x, layer.yPos[i], val);
+            this.drawNeuron(layer.x, layer.yPos[i], layer.neuronRadius, layer.headingGap, val);
         });
     }
     config(cfg) {
         this.cfg = cfg;
     }
     enrich(layer, index) {
-        const { baseX, xShift, headingHeight, boxSize } = this.cfg;
+        const { baseX, xShift, headingHeight, boxSize, neuronRadius, headingGap } = this.cfg;
     
         const count = layer.values.length;
         const layerHeight = count * boxSize + headingHeight;
@@ -149,6 +149,8 @@ class Visualiser {
             top: layerTop,
             boxSize,
             headingHeight,
+            neuronRadius,
+            headingGap,
             yPos
         });
     }
@@ -174,7 +176,9 @@ const settings = {
     baseX: 20,
     xShift: 110,
     headingHeight: 25,
-    boxSize: 70
+    boxSize: 70,
+    neuronRadius: 20,
+    headingGap: 40
 };
 visualiser.config(settings);
 
