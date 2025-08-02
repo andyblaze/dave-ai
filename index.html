@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dave AI Example</title>
-<style = "text/css">
+<style type="text/css">
     #nnCanvas {
         border:1px #000000 solid;
+        width:800px;
+        height:800px;
     }
 </style>
 </head>
@@ -116,29 +118,38 @@ class Visualiser {
         const blue = 255 - red;
         return `rgba(${red},0,${blue},0.5)`;
     }
-    drawNeuron(x, y, value, label) {
+    drawNeuron(x, y, value) {
         this.canvas.circle(x + this.circleRadius, y + this.circleRadius, this.circleRadius, this.valueToColor(value));
-        //this.canvas.text(label, x - this.circleRadius, y + 20);
         this.canvas.text(value.toFixed(2), x, y + this.circleRadius + 40);
-    }
-    grid() {
-        const Xs = [20, 140, 180];
-        const spacing = 0;
-        const count = this.layers[2].values.length;
-        const totalSpacing = spacing * (count - 1);
-        const availableHeight = this.height - totalSpacing;
-        const boxH = Math.floor(availableHeight / count);
-        const boxW = 80;
-        let boxes = [];
-        for ( let i = 0; i < count; i++ )
-            boxes.push({"x":140, "y":(i * boxH), "w":80, "h":80});
-        //console.log(boxes);
-        return boxes;
     }
     drawLayer(layer) {
         this.canvas.text(layer.title, layer.x, layer.top);
         layer.values.forEach((val, i) => {
-            this.drawNeuron(layer.x, (i * layer.boxSize) + layer.top + layer.headingHeight, val, `I${i + 1}`);
+            this.drawNeuron(layer.x, layer.yPos[i], val);
+        });
+    }
+    config(cfg) {
+        this.cfg = cfg;
+    }
+    enrich(layer, index) {
+        const { baseX, xShift, headingHeight, boxSize } = this.cfg;
+    
+        const count = layer.values.length;
+        const layerHeight = count * boxSize + headingHeight;
+        const layerTop = Math.floor((this.height - layerHeight) / 2);
+        
+        let yPos = [];
+        for (let j = 0; j < count; j++) {
+            yPos.push(j * boxSize + layerTop + headingHeight);
+        }
+        
+        Object.assign(layer, {
+            count,
+            x: index * xShift + baseX,
+            top: layerTop,
+            boxSize,
+            headingHeight,
+            yPos
         });
     }
     run() {
@@ -146,19 +157,9 @@ class Visualiser {
         let layers = this.net.getActivations(number);
         this.canvas.clear();
         //this.canvas.grid();
-        const baseX = 20;
-        const xShift = 110;
-        const headingHeight = 25;
-        const boxSize = 70;
-        for ( let i = 0; i < layers.length; i++ ) {
-            layers[i].count = layers[i].values.length;
-            const layerHeight = layers[i].count * boxSize + headingHeight;
-            const layerTop = Math.floor((this.height - layerHeight) / 2);
-            let newData = {
-                "x": i * xShift + baseX, "top": layerTop, "boxSize": boxSize, "headingHeight": headingHeight
-            };
-            Object.assign(layers[i], newData);
-            this.drawLayer(layers[i]);
+        for (const [i, layer] of layers.entries()) {
+            this.enrich(layer, i);
+            this.drawLayer(layer);
         }
     }
 }
@@ -169,7 +170,13 @@ const visualiser = new Visualiser("nnCanvas", 800, 800);
 trainer.loop(net);
 test.prediction(net);
 visualiser.setNetwork(net);
-  
+const settings = {
+    baseX: 20,
+    xShift: 110,
+    headingHeight: 25,
+    boxSize: 70
+};
+visualiser.config(settings);
 
 </script>
 </body>
