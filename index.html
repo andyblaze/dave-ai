@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dave AI Example</title>
-<style type="text/css">
-    #nnCanvas {
-        border:1px #000000 solid;
-        width:800px;
-        height:800px;
-    }
-</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dave AI Example</title>
+<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="css/styles.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<div>
-  <label>Input Number: <input type="number" id="testInput" value="105" min="0" max="160" /></label>
-  <button onclick="visualiser.run()">Visualize</button>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div>
+              <label>Input Number: <input type="number" id="testInput" value="105" min="0" max="160" /></label>
+              <button id="visrun">Visualize</button>
+            </div>        
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div>
+              <canvas id="nnCanvas" width="800" height="800"></canvas>
+            </div>        
+        </div>
+    </div>
 </div>
 
-<canvas id="nnCanvas" width="800" height="800"></canvas>
+<script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="js/jquery-3.7.1.min.js"></script>
 <script type="module" src="main.js"></script>
 
 </body>
