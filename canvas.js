@@ -11,6 +11,25 @@ export default class Canvas {
         this.ctx.fill();
         this.ctx.stroke();
     }
+    roundedRect(x, y, width, height, radius, fill, stroke) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + radius, y);
+        this.ctx.lineTo(x + width - radius, y);
+        this.ctx.arcTo(x + width, y, x + width, y + radius, radius);
+        this.ctx.lineTo(x + width, y + height - radius);
+        this.ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+        this.ctx.lineTo(x + radius, y + height);
+        this.ctx.arcTo(x, y + height, x, y + height - radius, radius);
+        this.ctx.lineTo(x, y + radius);
+        this.ctx.arcTo(x, y, x + radius, y, radius);
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = fill;
+        this.ctx.fill();
+
+        this.ctx.strokeStyle = stroke;
+        this.ctx.stroke();
+    }
     text(txt, x, y) {
         this.ctx.fillStyle = 'black';
         this.ctx.font = "20px sans-serif";
