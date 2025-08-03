@@ -7,8 +7,7 @@ class BaseRenderer {
     }
     draw(data) {
         const bBox = data.boundingBox;
-        console.log("in BaseRenderer.draw()", data.x, data.top);
-        this.canvas.text(data.title, data.x, 35); //data.top);
+        this.canvas.text(data.title, data.x, data.headingY);
         this.canvas.roundedRect(bBox.x, bBox.y, bBox.width, bBox.height, bBox.radius, bBox.fill, bBox.border);
         data.values.forEach((val, i) => {
             this.drawNeuron(data.x + bBox.xPad, data.yPos[i], data.neuronRadius, data.headingGap, val);
@@ -25,7 +24,7 @@ class JunctionBox extends BaseRenderer {
         super(canvas);
     }
     draw(data) {
-        this.canvas.circle(95, 400, 8, "black");
+        this.canvas.circle(135, 400, 4, "green");
     }
 }
 
@@ -54,17 +53,15 @@ export default class Visualiser {
     }
     computeLayout(data, index) {
         const { baseX, xShift, headingHeight, boxSize } = this.cfg;
-        console.log("in computeLayout()", baseX, xShift, headingHeight, boxSize);
         const count = data.values.length;
         const layerHeight = count * boxSize + headingHeight;
         const layerTop = Math.floor((this.height - layerHeight) / 2);
         const x = index * xShift + baseX;
-        console.log("in computeLayout()", count, layerTop, x);
         return { count, layerTop, x };
     }
 
     computeYPositions(count, layerTop, headingHeight, boxSize) {
-        return Array.from({ length: count }, (_, j) => j * boxSize + layerTop + headingHeight);
+        return Array.from({ length: count }, (_, y) => y * boxSize + layerTop + headingHeight);
     }
 
     computeBoundingBox(yPos, data, index) {
@@ -83,7 +80,6 @@ export default class Visualiser {
     }
     enrich(data, index) {
         const layout = this.computeLayout(data, index);
-        console.log("in enrich() layout", layout);
         const yPos = this.computeYPositions(layout.count, layout.layerTop, this.cfg.headingHeight, this.cfg.boxSize);
         const boundingBox = this.computeBoundingBox(yPos, data, index);
 
@@ -93,10 +89,10 @@ export default class Visualiser {
             boundingBox,
             boxSize: this.cfg.boxSize,
             headingHeight: this.cfg.headingHeight,
+            headingY: this.cfg.headingY,
             neuronRadius: this.cfg.neuronRadius,
             headingGap: this.cfg.headingGap
         });
-        console.log("in enrich data", data);
     }
     renderNetworkSnapshot() {
         const number = parseInt(document.getElementById("testInput").value);
@@ -107,7 +103,6 @@ export default class Visualiser {
         let junctionBox = new JunctionBox(this.canvas);
         for (const [i, data] of layerData.entries()) {
             this.enrich(data, i); 
-            //console.log(data);
             renderer.draw(data);
             if ( i === 0 )
                 junctionBox.draw();

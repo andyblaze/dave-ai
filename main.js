@@ -1,7 +1,7 @@
 import Dave from "./dave.js";
 import Trainer from "./trainer.js";
 import TestHarness from "./test-harness.js";
-import Visualiser from "./visualiser.js";
+import Visualiser from "./visualiser.js";  
 
 $(document).ready(function() {
     const net = new Dave(3, 10);
@@ -13,9 +13,10 @@ $(document).ready(function() {
     visualiser.setNetwork(net);
     const settings = {
         baseX: 20,
-        xShift: 130,
-        headingHeight: 25,
+        xShift: 160,
         boxSize: 70,
+        headingHeight: 25,
+        headingY: 35,
         neuronRadius: 20,
         headingGap: 40
     };
