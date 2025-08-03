@@ -22,6 +22,12 @@ export function encodeNumber(n) {
   ];
 }
 
+export function valueToColor(v, a=0.5) {
+    const red = Math.floor(v * 255);
+    const blue = 255 - red;
+    return `rgba(${red},0,${blue},${a})`;
+}
+
 export function average(arr) {
     if (!arr.length) return 0;
     return arr.reduce((sum, val) => sum + val, 0) / arr.length;

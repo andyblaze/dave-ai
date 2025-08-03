@@ -1,37 +1,21 @@
 import Canvas from "./canvas.js";
-import { average } from "./functions.js";
+import { average, valueToColor } from "./functions.js";
 
 class BaseRenderer {
     constructor(canvas) {
         this.canvas = canvas;
     }
-    valueToColor(v, a=0.5) {
-        const red = Math.floor(v * 255);
-        const blue = 255 - red;
-        return `rgba(${red},0,${blue},${a})`;
-    }
     draw(data) {
-        const bBox = {
-            width: data.boxSize,
-            height: data.boxSize * data.yPos.length + 10,
-            color: average(data.values),
-            xPad: Math.floor((data.boxSize - (data.neuronRadius * 2)) / 2),
-            radius: 6,
-            x: data.x,
-            y: data.yPos[0] - 10
-        };
+        const bBox = data.boundingBox;
+        console.log(bBox);
         this.canvas.text(data.title, data.x, data.top);
-        const height = data.boxSize * data.yPos.length + 10;
-        const color = average(data.values);
-        this.canvas.roundedRect(bBox.x, bBox.y, bBox.width, bBox.height, bBox.radius, this.valueToColor(bBox.color, 0.1), this.valueToColor(bBox.color, 0.5));
-        //this.canvas.roundedRect(data.x, data.yPos[0] - 10, data.boxSize, height, 6, this.valueToColor(color, 0.1), this.valueToColor(color, 0.5));
-        const xOffset = Math.floor((data.boxSize - (data.neuronRadius * 2)) / 2);
+        this.canvas.roundedRect(bBox.x, bBox.y, bBox.width, bBox.height, bBox.radius, bBox.fill, bBox.border);
         data.values.forEach((val, i) => {
             this.drawNeuron(data.x + bBox.xPad, data.yPos[i], data.neuronRadius, data.headingGap, val);
         });
     }
     drawNeuron(x, y, radius, gap, value) {
-        this.canvas.circle(x + radius, y + radius, radius, this.valueToColor(value));
+        this.canvas.circle(x + radius, y + radius, radius, valueToColor(value));
         this.canvas.text(value.toFixed(2), x, y + radius + gap);
     }
 }
@@ -55,13 +39,8 @@ export default class Visualiser {
     setNetwork(n) {
         this.net = n;
     }
-    valueToColor(v) {
-        const red = Math.floor(v * 255);
-        const blue = 255 - red;
-        return `rgba(${red},0,${blue},0.5)`;
-    }
     drawNeuron(x, y, radius, gap, value) {
-        this.canvas.circle(x + radius, y + radius, radius, this.valueToColor(value));
+        this.canvas.circle(x + radius, y + radius, radius, valueToColor(value));
         this.canvas.text(value.toFixed(2), x, y + radius + gap);
     }
     drawLayer(layer) {
@@ -73,27 +52,47 @@ export default class Visualiser {
     config(cfg) {
         this.cfg = cfg;
     }
-    enrich(data, index) {
-        const { baseX, xShift, headingHeight, boxSize, neuronRadius, headingGap } = this.cfg;
-    
+    computeLayout(data, index) {
+        const { baseX, xShift, headingHeight, boxSize } = this.cfg;
         const count = data.values.length;
         const layerHeight = count * boxSize + headingHeight;
         const layerTop = Math.floor((this.height - layerHeight) / 2);
-        
-        let yPos = [];
-        for (let j = 0; j < count; j++) {
-            yPos.push(j * boxSize + layerTop + headingHeight);
-        }
-        
-        Object.assign(data, {
-            count,
+        const x = index * xShift + baseX;
+
+        return { count, layerTop, x };
+    }
+
+    computeYPositions(count, layerTop, headingHeight, boxSize) {
+        return Array.from({ length: count }, (_, j) => j * boxSize + layerTop + headingHeight);
+    }
+
+    computeBoundingBox(yPos, data, index) {
+        const { boxSize, xShift, baseX, neuronRadius } = this.cfg;
+        const yPad = 10;
+        return {
+            width: boxSize,
+            height: boxSize * yPos.length + yPad,
+            fill: valueToColor(average(data.values), 0.1),
+            border: valueToColor(average(data.values), 0.5),
+            xPad: Math.floor((boxSize - (neuronRadius * 2)) / 2),
+            radius: 6,
             x: index * xShift + baseX,
-            top: layerTop,
-            boxSize,
-            headingHeight,
-            neuronRadius,
-            headingGap,
-            yPos
+            y: yPos[0] - yPad
+        };
+    }
+    enrich(data, index) {
+        const layout = this.computeLayout(data, index);
+        const yPos = this.computeYPositions(layout.count, layout.layerTop, this.cfg.headingHeight, this.cfg.boxSize);
+        const boundingBox = this.computeBoundingBox(yPos, data, index);
+
+        Object.assign(data, {
+            ...layout,
+            yPos,
+            boundingBox,
+            boxSize: this.cfg.boxSize,
+            headingHeight: this.cfg.headingHeight,
+            neuronRadius: this.cfg.neuronRadius,
+            headingGap: this.cfg.headingGap
         });
     }
     renderNetworkSnapshot() {
@@ -105,7 +104,7 @@ export default class Visualiser {
         let junctionBox = new JunctionBox(this.canvas);
         for (const [i, data] of layerData.entries()) {
             this.enrich(data, i); 
-            console.log(data);
+            //console.log(data);
             renderer.draw(data);
             if ( i === 0 )
                 junctionBox.draw();
