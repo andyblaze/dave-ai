@@ -1,5 +1,26 @@
 import Canvas from "./canvas.js";
 
+class BaseDrawer {
+    constructor(canvas) {
+        this.canvas = canvas;
+    }
+    valueToColor(v) {
+        const red = Math.floor(v * 255);
+        const blue = 255 - red;
+        return `rgba(${red},0,${blue},0.5)`;
+    }
+    draw(data) {
+        this.canvas.text(data.title, data.x, data.top);
+        data.values.forEach((val, i) => {
+            this.drawNeuron(data.x, data.yPos[i], data.neuronRadius, data.headingGap, val);
+        });
+    }
+    drawNeuron(x, y, radius, gap, value) {
+        this.canvas.circle(x + radius, y + radius, radius, this.valueToColor(value));
+        this.canvas.text(value.toFixed(2), x, y + radius + gap);
+    }
+}
+
 export default class Visualiser {
     constructor(canvasID, w, h) {
         this.canvas = new Canvas(canvasID, w, h);
@@ -28,10 +49,10 @@ export default class Visualiser {
     config(cfg) {
         this.cfg = cfg;
     }
-    enrich(layer, index) {
+    enrich(data, index) {
         const { baseX, xShift, headingHeight, boxSize, neuronRadius, headingGap } = this.cfg;
     
-        const count = layer.values.length;
+        const count = data.values.length;
         const layerHeight = count * boxSize + headingHeight;
         const layerTop = Math.floor((this.height - layerHeight) / 2);
         
@@ -40,7 +61,7 @@ export default class Visualiser {
             yPos.push(j * boxSize + layerTop + headingHeight);
         }
         
-        Object.assign(layer, {
+        Object.assign(data, {
             count,
             x: index * xShift + baseX,
             top: layerTop,
@@ -53,12 +74,17 @@ export default class Visualiser {
     }
     run() {
         const number = parseInt(document.getElementById("testInput").value);
-        let layers = this.net.getActivations(number);
+        let layerData = this.net.getActivations(number);
         this.canvas.clear();
         //this.canvas.grid();
-        for (const [i, layer] of layers.entries()) {
-            this.enrich(layer, i);
-            this.drawLayer(layer);
+        let layer = null;
+        for (const [i, data] of layerData.entries()) {
+            this.enrich(data, i);
+            //this.drawLayer(data);
+            //if ( i === 0 ) {
+                layer = new BaseDrawer(this.canvas);
+                layer.draw(data);
+            //}
         }
     }
 }
