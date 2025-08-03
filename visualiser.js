@@ -11,12 +11,23 @@ class BaseRenderer {
         return `rgba(${red},0,${blue},${a})`;
     }
     draw(data) {
+        const bBox = {
+            width: data.boxSize,
+            height: data.boxSize * data.yPos.length + 10,
+            color: average(data.values),
+            xPad: Math.floor((data.boxSize - (data.neuronRadius * 2)) / 2),
+            radius: 6,
+            x: data.x,
+            y: data.yPos[0] - 10
+        };
         this.canvas.text(data.title, data.x, data.top);
         const height = data.boxSize * data.yPos.length + 10;
         const color = average(data.values);
-        this.canvas.roundedRect(data.x, data.yPos[0] - 10, data.boxSize, height, 6, this.valueToColor(color, 0.1), this.valueToColor(color, 0.5));
+        this.canvas.roundedRect(bBox.x, bBox.y, bBox.width, bBox.height, bBox.radius, this.valueToColor(bBox.color, 0.1), this.valueToColor(bBox.color, 0.5));
+        //this.canvas.roundedRect(data.x, data.yPos[0] - 10, data.boxSize, height, 6, this.valueToColor(color, 0.1), this.valueToColor(color, 0.5));
+        const xOffset = Math.floor((data.boxSize - (data.neuronRadius * 2)) / 2);
         data.values.forEach((val, i) => {
-            this.drawNeuron(data.x + 14, data.yPos[i], data.neuronRadius, data.headingGap, val);
+            this.drawNeuron(data.x + bBox.xPad, data.yPos[i], data.neuronRadius, data.headingGap, val);
         });
     }
     drawNeuron(x, y, radius, gap, value) {
