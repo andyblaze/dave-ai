@@ -6,6 +6,14 @@ class BaseRenderer {
         this.canvas = canvas;
     }
     draw(data) {
+        throw new Error("Must override BaseRenderer.draw()");
+    }
+}
+class LayerRenderer extends BaseRenderer {
+    constructor(canvas) {
+        super(canvas);
+    }
+    draw(data) {
         const bBox = data.boundingBox;
         this.canvas.text(data.title, data.x, data.headingY);
         this.canvas.roundedRect(bBox.x, bBox.y, bBox.width, bBox.height, bBox.radius, bBox.fill, bBox.border);
@@ -99,7 +107,7 @@ export default class Visualiser {
         let layerData = this.net.getActivations(number);
         this.canvas.clear();
         //this.canvas.grid();
-        let renderer = new BaseRenderer(this.canvas);
+        let renderer = new LayerRenderer(this.canvas);
         let junctionBox = new JunctionBox(this.canvas);
         for (const [i, data] of layerData.entries()) {
             this.enrich(data, i); 
