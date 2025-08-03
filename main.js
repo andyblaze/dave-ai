@@ -20,5 +20,5 @@ $(document).ready(function() {
         headingGap: 40
     };
     visualiser.config(settings);
-    $("#visrun").on("click", () => visualiser.run());
+    $("#visualise").on("click", () => visualiser.renderNetworkSnapshot());
 });

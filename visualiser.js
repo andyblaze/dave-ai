@@ -1,6 +1,6 @@
 import Canvas from "./canvas.js";
 
-class BaseDrawer {
+class BaseRenderer {
     constructor(canvas) {
         this.canvas = canvas;
     }
@@ -72,19 +72,15 @@ export default class Visualiser {
             yPos
         });
     }
-    run() {
+    renderNetworkSnapshot() {
         const number = parseInt(document.getElementById("testInput").value);
         let layerData = this.net.getActivations(number);
         this.canvas.clear();
         //this.canvas.grid();
-        let layer = null;
+        let renderer = new BaseRenderer(this.canvas);
         for (const [i, data] of layerData.entries()) {
-            this.enrich(data, i);
-            //this.drawLayer(data);
-            //if ( i === 0 ) {
-                layer = new BaseDrawer(this.canvas);
-                layer.draw(data);
-            //}
+            this.enrich(data, i);            
+            renderer.draw(data);
         }
     }
 }
